@@ -15,11 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 import static com.nanos.test.constants.SecurityConstants.SIGN_IN_URL;
@@ -27,17 +25,13 @@ import static com.nanos.test.constants.SecurityConstants.SIGN_UP_URL;
 
 @RestController
 @AllArgsConstructor
-
 public class UserController {
     private UserService userService;
     AuthenticationManager authenticationManager;
     PasswordEncoder encoder;
     JwtUtil jwtUtil;
     MyUserDetailsService myUserDetailsService;
-    @GetMapping(value="/allstudent")
-    public String getAllStudent(){
-        return "jj";
-    }
+
 
     @GetMapping(value="/alluser")
     public List<User> getAllUsers(){
@@ -57,7 +51,17 @@ public class UserController {
         String token = jwtUtil.generateToken(userDetails);
         String body = ((MyUserDetails)authentication.getPrincipal()).getUsername() + " "+token;
         JwtResposne jwtResposne =new JwtResposne(token);
-
         return ResponseEntity.ok(jwtResposne);
+    }
+
+    @GetMapping(value="/getbyusername")
+    public User getByUsername(@RequestParam String userName){
+        return userService.getByUsername(userName);
+    }
+    @GetMapping(value="/getuser")
+    public User getUser(Principal principal){
+        String userName=principal.getName();
+        User user = userService.getByUsername(userName);
+        return user;
     }
 }
